@@ -13,7 +13,7 @@
  */
 
 const BASE = process.argv[2] || 'http://127.0.0.1:3000';
-const KEY = process.env.INBOUND_WEBHOOK_KEY || 'super-secret-webhook-key-change-me';
+const KEY = process.env.INBOUND_WEBHOOK_KEY || 'super-secret-webhook-key';
 
 let pass = 0;
 let fail = 0;
@@ -26,6 +26,7 @@ function check(name, condition, extra = '') {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function main() {
+  let code1 = null; // يُعرَّف في وضع local (ويب هوك) ويُستخدم لاحقاً في فحص OTP
   console.log(`\n🔬 اختبارات API — ظرف @ ${BASE}\n`);
 
   /* ---------- 0) المزوّد ---------- */
@@ -88,7 +89,7 @@ async function main() {
     console.log('6) POST /api/inbound/webhook — ⏭  متجاوز (المزوّد mail.tm لا يستخدم الويب هوك)');
   } else {
   console.log('6) POST /api/inbound/webhook (RAW — Cloudflare)');
-  const code1 = String(Math.floor(100000 + Math.random() * 900000));
+  code1 = String(Math.floor(100000 + Math.random() * 900000));
   const rawEmail = [
     'From: "Netflix" <no-reply@netflix.com>',
     `To: ${randomAddress}`,
