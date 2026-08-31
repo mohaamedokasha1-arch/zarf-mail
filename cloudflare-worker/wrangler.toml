@@ -1,0 +1,14 @@
+# إعدادات النشر لعامل استقبال البريد — ظرف
+# ثبّت Wrangler:  npm i -g wrangler
+# سجّل الدخول:    npx wrangler login
+# انشر:          npx wrangler deploy --config cloudflare-worker/wrangler.toml
+
+name = "zarf-inbound"
+main = "worker.js"
+compatibility_date = "2024-12-01"
+
+# المتغيرات السرية (أفضل طريقة: wrangler secret put)
+# npx wrangler secret put ZARF_WEBHOOK_KEY
+[vars]
+ZARF_WEBHOOK_URL = "https://your-zarf-server.onrender.com/api/inbound/webhook"
+ZARF_WEBHOOK_KEY = "super-secret-webhook-key-change-me"

@@ -1,0 +1,55 @@
+{
+  "name": "zarf-mail",
+  "version": "2.0.0",
+  "private": true,
+  "description": "ظرف (Zarf Mail) — خدمة بريد إلكتروني مؤقت سريعة، أنيقة، وآمنة مع استخراج تلقائي لأكواد التحقق OTP",
+  "main": "server/index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "watch": "node --watch server/index.js",
+    "build:css": "tailwindcss -i ./src/input.css -o ./public/assets/css/tailwind.css --minify",
+    "watch:css": "tailwindcss -i ./src/input.css -o ./public/assets/css/tailwind.css --watch",
+    "test:smtp": "node scripts/test-smtp.js",
+    "setup": "npm install && npm run build:css",
+    "test:api": "node scripts/test-api.js",
+    "test:mailtm": "node scripts/test-mailtm.js",
+    "cleanup": "node scripts/cleanup.js",
+    "cron:cleanup": "node scripts/cleanup.js",
+    "test:ui": "node scripts/test-i18n-ui.js",
+    "test:all": "npm run test:api && npm run test:mailtm && npm run test:ui && npm run test:i18n",
+    "test:i18n": "node scripts/test-i18n-keys.js"
+  },
+  "keywords": [
+    "temp-mail",
+    "disposable-email",
+    "zarf",
+    "ظرف",
+    "otp",
+    "email"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "compression": "^1.7.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^7.2.0",
+    "mailparser": "^3.7.2",
+    "nodemailer": "^6.10.0",
+    "sanitize-html": "^2.14.0",
+    "smtp-server": "^3.13.6"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
+    "jsdom": "^29.1.1"
+  }
+}

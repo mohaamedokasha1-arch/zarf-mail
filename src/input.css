@@ -1,0 +1,183 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================================
+   متغيرات الألوان — الوضع الداكن هو الافتراضي (براند ظرف)
+   ============================================================= */
+@layer base {
+  :root {
+    --bg: 5 7 15;            /* خلفية الصفحة */
+    --surface: 13 18 33;     /* البطاقات */
+    --surface-2: 20 27 46;   /* طبقة أفتح */
+    --line: 39 48 78;        /* الحدود */
+    --fg: 226 232 240;       /* النص الأساسي */
+    --muted: 148 163 184;    /* النص الثانوي */
+    --brand: 99 102 241;     /* إنديجو */
+    --brand-2: 139 92 246;   /* بنفسجي */
+    --accent: 34 211 238;    /* سماوي */
+    --success: 34 197 94;
+    --warning: 251 191 36;
+    --danger: 244 63 94;
+  }
+
+  /* الوضع النهاري (اختياري — يُفعّل بالزر في الأعلى) */
+  html.light {
+    --bg: 246 247 251;
+    --surface: 255 255 255;
+    --surface-2: 241 243 249;
+    --line: 219 223 235;
+    --fg: 23 28 45;
+    --muted: 96 106 128;
+    --brand: 79 70 229;
+    --brand-2: 124 58 237;
+    --accent: 8 145 178;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-bg text-fg font-sans antialiased;
+    background-image: theme('backgroundImage.grid');
+    background-attachment: fixed;
+  }
+
+  /* شريط تمرير أنيق */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--line));
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: rgb(var(--brand) / .8); background-clip: content-box; }
+
+  ::selection { background: rgb(var(--brand) / .35); color: rgb(var(--fg)); }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--brand));
+    outline-offset: 2px;
+  }
+}
+
+/* =============================================================
+   مكوّنات جاهزة (Components)
+   ============================================================= */
+@layer components {
+  /* بطاقة زجاجية بحدود مضيئة */
+  .zarf-card {
+    @apply relative rounded-4xl border border-line/80 bg-surface/70 backdrop-blur-xl shadow-card;
+  }
+
+  /* أزرار */
+  .zarf-btn {
+    @apply inline-flex select-none items-center justify-center gap-2 rounded-2xl px-4 py-2.5
+           text-sm font-semibold transition-all duration-200 active:scale-[.97]
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .zarf-btn-primary {
+    @apply zarf-btn text-white bg-brand-gradient bg-[length:200%_200%] animate-gradient-pan
+           shadow-glow hover:brightness-110;
+  }
+  .zarf-btn-ghost {
+    @apply zarf-btn border border-line bg-surface2/60 text-fg hover:border-brand/60 hover:bg-surface2;
+  }
+  .zarf-btn-soft {
+    @apply zarf-btn bg-surface2/70 text-fg hover:bg-surface2;
+  }
+  .zarf-btn-danger {
+    @apply zarf-btn border border-danger/40 bg-danger/10 text-danger hover:bg-danger/20;
+  }
+
+  /* شرائح صغيرة */
+  .zarf-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-surface2/60
+           px-3 py-1 text-xs font-medium text-muted;
+  }
+
+  /* حقل إدخال */
+  .zarf-input {
+    @apply w-full rounded-2xl border border-line bg-surface2/60 px-4 py-3 text-sm text-fg
+           placeholder:text-muted/70 outline-none transition
+           focus:border-brand focus:ring-4 focus:ring-brand/15;
+  }
+
+  /* عنوان البريد */
+  .email-text {
+    @apply font-mono text-base sm:text-xl font-bold tracking-tight;
+    background: linear-gradient(100deg, rgb(var(--fg)), rgb(var(--brand-2)), rgb(var(--accent)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* شريط كود التحقق البارز */
+  .otp-banner {
+    @apply relative overflow-hidden rounded-2xl border border-warning/40 bg-warning/10 p-4;
+  }
+
+  /* صف رسالة (ملاحظة: الصنف group لا يُستخدم مع @apply، نضيفه في HTML) */
+  .message-row {
+    @apply relative flex cursor-pointer gap-3 rounded-2xl border border-transparent
+           p-3 transition-all duration-200 hover:border-brand/40 hover:bg-surface2/70;
+  }
+  .message-row.unread {
+    @apply border-brand/30 bg-brand/5;
+  }
+
+  /* هيكل تحميل ناعم */
+  .skeleton {
+    @apply relative overflow-hidden rounded-xl bg-surface2;
+  }
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
+    background: linear-gradient(90deg, transparent, rgb(var(--fg) / .07), transparent);
+  }
+
+  /* شريط تقدّم علوي رقيق */
+  .top-progress {
+    @apply fixed left-0 top-0 z-[60] h-[3px] w-full overflow-hidden;
+  }
+  .top-progress::before {
+    content: '';
+    @apply absolute inset-y-0 left-0 w-1/3 animate-bar-load rounded-full;
+    background: linear-gradient(90deg, rgb(var(--brand)), rgb(var(--accent)));
+  }
+}
+
+/* =============================================================
+   أدوات مساعدة (Utilities)
+   ============================================================= */
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(100deg, rgb(var(--brand)), rgb(var(--brand-2)), rgb(var(--accent)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .glass {
+    @apply bg-surface/60 backdrop-blur-xl;
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .rtl-flip { transform: scaleX(-1); }
+
+  /* حاوية محتوى الرسالة داخل المودال */
+  .mail-body {
+    @apply text-[15px] leading-8 text-fg/90;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  .mail-body a { @apply text-accent underline underline-offset-2; }
+  .mail-body img { @apply my-3 max-w-full rounded-xl; }
+  .mail-body table { @apply my-3 w-full border-collapse text-sm; }
+  .mail-body td, .mail-body th { @apply border border-line px-2 py-1; }
+}

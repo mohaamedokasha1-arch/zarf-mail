@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n-title-doc="meta.title">ظرف | Zarf Mail — بريد إلكتروني مؤقت فوري</title>
+  <meta name="description" data-i18n-content="meta.desc" content="بريد مؤقت جاهز في ثانية — مع استخراج تلقائي لأكواد التحقق." />
+  <meta name="theme-color" content="#05070F" />
+  <meta name="robots" content="index, follow" />
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
+  <link rel="stylesheet" href="assets/css/tailwind.css" />
+
+  <!-- ضبط اللغة والاتجاه والوضع الليلي قبل أول رسم (يمنع أي وميض) -->
+  <script src="assets/js/boot.js"></script>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="ظرف | Zarf Mail" />
+  <meta property="og:description" content="بريد مؤقت جاهز في ثانية — مع استخراج تلقائي لأكواد التحقق." />
+  <meta property="og:image" content="assets/img/og.svg" />
+</head>
+
+<body class="min-h-screen overflow-x-hidden">
+
+  <!-- ===================== شريط تقدّم علوي ===================== -->
+  <div id="progress" class="top-progress hidden"></div>
+
+  <!-- ===================== خلفية متحركة ===================== -->
+  <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute -top-40 right-[-8%] h-[460px] w-[460px] rounded-full bg-brand/25 blur-[130px] animate-blob"></div>
+    <div class="absolute top-1/3 left-[-12%] h-[420px] w-[420px] rounded-full bg-brand2/20 blur-[130px] animate-blob [animation-delay:6s]"></div>
+    <div class="absolute bottom-[-10%] right-1/4 h-[380px] w-[380px] rounded-full bg-accent/15 blur-[130px] animate-blob [animation-delay:12s]"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-bg/40 to-bg"></div>
+  </div>
+
+  <!-- ===================== الشريط العلوي ===================== -->
+  <header class="sticky top-0 z-40 border-b border-line/60 glass">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+      <!-- الشعار -->
+      <a href="/" class="group flex items-center gap-3">
+        <span class="relative grid h-11 w-11 place-items-center rounded-2xl bg-brand-gradient shadow-glow transition-transform duration-300 group-hover:scale-105">
+          <svg viewBox="0 0 24 24" fill="none" class="h-6 w-6 text-white" aria-hidden="true">
+            <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h13A2.5 2.5 0 0 1 21 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 16.5v-9Z" stroke="currentColor" stroke-width="1.7"/>
+            <path d="m3.8 7.2 7.1 5.4a2 2 0 0 0 2.2 0l7.1-5.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="flex flex-col leading-tight">
+          <span class="text-lg font-extrabold tracking-tight">
+            ظرف <span class="text-gradient">Zarf</span>
+          </span>
+          <span class="text-[11px] text-muted" data-i18n="brand.tagline">بريد مؤقت · يُحذف تلقائياً</span>
+        </span>
+      </a>
+
+      <!-- أدوات -->
+      <nav class="flex items-center gap-2">
+        <!-- حالة الاتصال -->
+        <span class="zarf-chip hidden sm:inline-flex" title="حالة السيرفر">
+          <span id="statusDot" class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping-slow rounded-full bg-success/70"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-success"></span>
+          </span>
+          <span id="statusText" data-i18n="nav.statusOnline">متصل</span>
+        </span>
+
+        <!-- ===================== مبدّل اللغة ===================== -->
+        <div class="relative" id="langWrap">
+          <button id="langBtn" type="button"
+                  class="zarf-btn-ghost !px-3 !py-2"
+                  data-i18n-aria="nav.language" aria-haspopup="listbox" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M3.5 9h17M3.5 15h17M12 3c2.5 2.4 2.5 15.6 0 18M12 3c-2.5 2.4-2.5 15.6 0 18" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <span id="langCurrent" class="hidden sm:inline">العربية</span>
+            <span id="langCurrentShort" class="sm:hidden">ع</span>
+            <svg viewBox="0 0 24 24" fill="none" class="h-3.5 w-3.5 opacity-70" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <!-- القائمة المنسدلة (تُبنى بالجافاسكربت) -->
+          <div id="langMenu" role="listbox"
+               class="absolute start-0 top-full z-50 mt-2 hidden max-h-80 w-56 overflow-y-auto rounded-2xl border border-line bg-surface/95 p-1.5 shadow-card backdrop-blur-xl">
+          </div>
+        </div>
+
+        <button id="howBtn" class="zarf-btn-ghost !px-3 !py-2 text-xs sm:text-sm" data-i18n-aria="nav.how" title="كيف يعمل ظرف؟">
+          <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M12 16v-4.5M12 8.2v.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span class="hidden sm:inline" data-i18n="nav.how">كيف يعمل؟</span>
+        </button>
+
+        <button id="themeToggle" class="zarf-btn-ghost !px-3 !py-2" title="تبديل الوضع الليلي" aria-label="تبديل الوضع">
+          <svg id="iconMoon" viewBox="0 0 24 24" fill="none" class="h-4 w-4" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+          </svg>
+          <svg id="iconSun" viewBox="0 0 24 24" fill="none" class="hidden h-4 w-4" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6l1.4 1.4m10 10 1.4 1.4m0-12.8-1.4 1.4m-10 10-1.4 1.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="mx-auto w-full max-w-6xl px-4 pb-28">
+
+    <!-- ===================== العنوان الرئيسي ===================== -->
+    <section class="pt-12 text-center sm:pt-16">
+      <span class="zarf-chip mx-auto mb-5 animate-fade-in !border-brand/40 !bg-brand/10 !text-brand" data-i18n="hero.badge">
+        مجاني بالكامل · بدون تسجيل · بلا أي بيانات شخصية
+      </span>
+
+      <h1 class="animate-slide-up text-4xl font-black leading-[1.25] tracking-tight sm:text-6xl">
+        <span data-i18n="hero.titleStart">بريدك المؤقت</span>
+        <span class="text-gradient" data-i18n="hero.titleHighlight">جاهز في ثانية</span>
+      </h1>
+
+      <p class="mx-auto mt-5 max-w-2xl animate-slide-up text-base leading-8 text-muted sm:text-lg [animation-delay:80ms]" data-i18n="hero.subtitle">
+        استلم رسائل التأكيد وأكواد التحقق في صندوق وارد حيّ يتحدّث لحظياً. سريع، أنيق، وآمن — هذا هو ظرف.
+      </p>
+    </section>
+
+    <!-- ===================== بطاقة البريد ===================== -->
+    <section class="zarf-card mt-10 animate-slide-up p-5 sm:p-7 [animation-delay:140ms]">
+      <div class="flex flex-col gap-5">
+
+        <!-- شارة المزوّد -->
+        <div class="flex items-center justify-between gap-3">
+          <span id="providerBadge" class="zarf-chip hidden !border-success/40 !bg-success/10 !text-success"></span>
+        </div>
+
+        <!-- السطر الأول: العنوان + نسخ -->
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div class="flex min-w-0 flex-1 items-center gap-3 rounded-2xl border border-line bg-surface2/50 px-4 py-4">
+            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand/15 text-brand">
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5" aria-hidden="true">
+                <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h13A2.5 2.5 0 0 1 21 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 16.5v-9Z" stroke="currentColor" stroke-width="1.7"/>
+                <path d="m3.8 7.2 7.1 5.4a2 2 0 0 0 2.2 0l7.1-5.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </span>
+
+            <div class="min-w-0 flex-1">
+              <p class="mb-0.5 text-[11px] font-medium text-muted" data-i18n="card.addressLabel">عنوان بريدك المؤقت</p>
+              <p id="emailText" class="email-text truncate" data-i18n="card.preparing" data-i18n-title="card.addressLabel">جارٍ تحضير بريدك…</p>
+            </div>
+
+            <button id="copyBtn" class="zarf-btn-primary !px-4 !py-2.5" data-i18n-aria="card.copy" title="نسخ العنوان">
+              <svg id="copyIcon" viewBox="0 0 24 24" fill="none" class="h-4 w-4" aria-hidden="true">
+                <rect x="9" y="9" width="11" height="11" rx="2.5" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M15 6.5V6A2 2 0 0 0 13 4H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+              <span id="copyLabel" data-i18n="card.copy">نسخ</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- شريط كود التحقق السريع -->
+        <div id="otpStrip" class="otp-banner hidden animate-pop-in">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span class="grid h-10 w-10 place-items-center rounded-xl bg-warning/20 text-warning">
+                <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5" aria-hidden="true">
+                  <path d="M12 3l7 3.5v5c0 4.2-2.9 7.9-7 9-4.1-1.1-7-4.8-7-9v-5L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                  <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <div>
+                <p class="text-xs font-medium text-warning" data-i18n="otp.quick">آخر كود تحقق وصل (OTP)</p>
+                <p id="otpStripCode" class="font-mono text-2xl font-black tracking-[.35em] text-fg">—</p>
+              </div>
+            </div>
+            <button id="otpStripCopy" class="zarf-btn !bg-warning/20 !text-warning hover:!bg-warning/30" data-i18n-aria="otp.copy">
+              <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4" aria-hidden="true">
+                <rect x="9" y="9" width="11" height="11" rx="2.5" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M15 6.5V6A2 2 0 0 0 13 4H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+              <span data-i18n="otp.copy">نسخ الكود</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- الأزرار + العدّاد التنازلي -->
+        <div class="flex flex-col gap-4 border-t border-line/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="newEmailBtn" class="zarf-btn-primary" data-i18n-aria="btn.new" title="توليد بريد جديد (N)">
+              <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4" aria-hidden="true">
+                <path d="M20 11.5A8 8 0 1 1 12.5 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M20 4.5V10h-5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span data-i18n="btn.new">بريد جديد</span>
+            </button>
+
+            <button id="customEmailBtn" class="zarf-btn-ghost" data-i18n-aria="btn.custom" title="اختيار اسم مخصص">
+              <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4" aria-hidden="true">
+                <path d="M12 20h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M16.5 3.9a2.2 2.2 0 0 1 3.1 3.1L8.2 18.4l-4 1 1-4L16.5 3.9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              </svg>
+              <span data-i18n="btn.custom">اسم مخصص</span>
+            </button>
+
+            <button id="refreshBtn" class="zarf-btn-ghost" data-i18n-aria="btn.refresh" title="تحديث الآن (R)">
+              <svg id="refreshIcon" viewBox="0 0 24 24" fill="none" class="h-4 w-4" aria-hidden="true">
+                <path d="M20 11.5A8 8 0 1 1 12.5 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M20 4.5V10h-5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span data-i18n="btn.refresh">تحديث</span>
+            </button>
+
+            <button id="deleteEmailBtn" class="zarf-btn-danger" data-i18n-aria="btn.delete" title="حذف البريد وكل رسائله">
+              <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4" aria-hidden="true">
+                <path d="M5 7h14M10 7V5.5A1.5 1.5 0 0 1 11.5 4h1A1.5 1.5 0 0 1 14 5.5V7m-6 0 .8 11.2A2 2 0 0 0 10.8 20h2.4a2 2 0 0 0 2-1.8L16 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+              <span data-i18n="btn.delete">حذف البريد</span>
+            </button>
+          </div>
+
+          <!-- العدّاد التنازلي (7 أيام) -->
+          <div class="flex items-center gap-3">
+            <div class="text-start" data-i18n-title="ttl.label" title="مدة الصلاحية">
+              <p class="text-[11px] text-muted" data-i18n="ttl.left">يُحذف تلقائياً بعد</p>
+              <p id="countdownText" class="font-mono text-sm font-bold text-fg">--:--</p>
+              <p id="ttlNote" class="text-[10px] text-muted/80"></p>
+            </div>
+            <div class="h-10 w-10">
+              <svg viewBox="0 0 36 36" class="h-10 w-10 -rotate-90">
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgb(var(--line))" stroke-width="3"></circle>
+                <circle id="countdownRing" cx="18" cy="18" r="15.5" fill="none" stroke="rgb(var(--accent))" stroke-width="3"
+                        stroke-linecap="round" stroke-dasharray="97.4" stroke-dashoffset="0"
+                        class="transition-[stroke-dashoffset] duration-1000 ease-linear"></circle>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- صف الاسم المخصص -->
+        <div id="customRow" class="hidden animate-pop-in flex-col gap-3 rounded-2xl border border-dashed border-brand/40 bg-brand/5 p-4 sm:flex-row sm:items-center">
+          <div class="flex-1">
+            <label for="customInput" class="mb-1.5 block text-xs font-medium text-muted" data-i18n="custom.title">
+              اختر الجزء الأول من العنوان
+            </label>
+            <div class="flex items-center gap-2">
+              <input id="customInput" type="text" maxlength="30" autocomplete="off" spellcheck="false"
+                     class="zarf-input font-mono" data-i18n-placeholder="custom.placeholder" placeholder="ahmed" />
+              <span class="shrink-0 font-mono text-sm text-muted">@<span id="customDomain">zarf.mail</span></span>
+            </div>
+            <p id="customHint" class="mt-1 hidden text-[11px] text-warning"></p>
+          </div>
+          <div class="flex gap-2">
+            <button id="applyCustomBtn" class="zarf-btn-primary !py-3"><span data-i18n="custom.apply">تطبيق</span></button>
+            <button id="cancelCustomBtn" class="zarf-btn-ghost !py-3"><span data-i18n="custom.cancel">إلغاء</span></button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================== صندوق الوارد ===================== -->
+    <section class="zarf-card mt-6 animate-slide-up overflow-hidden [animation-delay:200ms]">
+      <div class="flex flex-col gap-3 border-b border-line/70 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div class="flex items-center gap-3">
+          <h2 class="text-lg font-bold" data-i18n="inbox.title">صندوق الوارد</h2>
+          <span id="messagesCount" class="zarf-chip !border-brand/40 !bg-brand/10 !text-brand">0 رسالة</span>
+          <span id="unreadCount" class="zarf-chip hidden !border-accent/40 !bg-accent/10 !text-accent">0 جديد</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <div class="relative">
+            <svg viewBox="0 0 24 24" fill="none" class="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true">
+              <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/>
+              <path d="m16 16 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+            <input id="searchInput" type="search" class="zarf-input !py-2.5 !ps-10 !text-sm sm:w-56"
+                   data-i18n-placeholder="inbox.search" data-i18n-aria="inbox.search" placeholder="ابحث في الرسائل…" />
+          </div>
+
+          <label class="flex cursor-pointer select-none items-center gap-2 rounded-2xl border border-line bg-surface2/60 px-3 py-2.5 text-xs font-medium text-muted">
+            <span class="relative inline-flex h-5 w-9 items-center rounded-full bg-line transition-colors" id="autoSwitch">
+              <span id="autoKnob" class="absolute end-0.5 h-4 w-4 rounded-full bg-white transition-transform duration-300"></span>
+            </span>
+            <input id="autoToggle" type="checkbox" class="sr-only" checked />
+            <span class="hidden sm:inline" data-i18n="inbox.auto">تحديث تلقائي</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- قائمة الرسائل -->
+      <div id="messagesList" class="divide-y divide-line/50"></div>
+
+      <!-- حالة الفراغ -->
+      <div id="emptyState" class="hidden flex-col items-center justify-center gap-4 px-6 py-16 text-center">
+        <div class="relative">
+          <div class="absolute inset-0 -z-10 rounded-full bg-brand/20 blur-2xl"></div>
+          <svg viewBox="0 0 120 90" class="h-28 w-40 animate-float" aria-hidden="true">
+            <rect x="12" y="20" width="96" height="58" rx="8" fill="rgb(var(--surface-2))" stroke="rgb(var(--line))" stroke-width="2"/>
+            <path d="M12 28l48 32 48-32" fill="none" stroke="rgb(var(--brand))" stroke-width="2.5" stroke-linejoin="round"/>
+            <circle cx="94" cy="26" r="9" fill="rgb(var(--accent))" opacity=".22"/>
+            <path d="M90 26l3 3 5-6" stroke="rgb(var(--accent))" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold" data-i18n="empty.title">الظرف فارغ… بعد!</h3>
+        <p class="max-w-sm text-sm leading-7 text-muted" data-i18n="empty.desc">
+          استخدم العنوان أعلاه في أي موقع وستصل رسائلك إلى هنا خلال ثوانٍ.
+        </p>
+        <button id="demoBtn" class="zarf-btn-ghost !py-3 text-xs">
+          <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4" aria-hidden="true">
+            <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+          </svg>
+          <span data-i18n="empty.demo">أرسل رسالة تجريبية الآن</span>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between gap-3 border-t border-line/70 bg-surface2/30 px-4 py-3 text-[11px] text-muted sm:px-5">
+        <span id="lastUpdate" data-i18n="inbox.lastUpdateEmpty">آخر تحديث: —</span>
+        <span class="hidden sm:inline" data-i18n="inbox.secure">محتوى الرسائل يُعرض داخل إطار معزول لحمايتك</span>
+      </div>
+    </section>
+
+    <!-- ===================== المميزات ===================== -->
+    <section class="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <article class="zarf-card p-5">
+        <span class="mb-3 grid h-11 w-11 place-items-center rounded-2xl bg-brand/15 text-brand">⚡</span>
+        <h3 class="mb-1 font-bold" data-i18n="features.f1t">فوري بلا انتظار</h3>
+        <p class="text-sm leading-7 text-muted" data-i18n="features.f1d">بريد جاهز لحظة فتح الموقع، وصندوق وارد يتحدّث تلقائياً.</p>
+      </article>
+      <article class="zarf-card p-5">
+        <span class="mb-3 grid h-11 w-11 place-items-center rounded-2xl bg-warning/15 text-warning">🔑</span>
+        <h3 class="mb-1 font-bold" data-i18n="features.f2t">استخراج أكواد OTP</h3>
+        <p class="text-sm leading-7 text-muted" data-i18n="features.f2d">نتعرّف على كود التحقق تلقائياً ونعرضه في الأعلى بنسخة واحدة.</p>
+      </article>
+      <article class="zarf-card p-5">
+        <span class="mb-3 grid h-11 w-11 place-items-center rounded-2xl bg-success/15 text-success">🛡️</span>
+        <h3 class="mb-1 font-bold" data-i18n="features.f3t">خصوصية حقيقية</h3>
+        <p class="text-sm leading-7 text-muted" data-i18n="features.f3d">لا تسجيل ولا بريد شخصي — كل شيء يُمحى تلقائياً بعد 7 أيام.</p>
+      </article>
+      <article class="zarf-card p-5">
+        <span class="mb-3 grid h-11 w-11 place-items-center rounded-2xl bg-accent/15 text-accent">🎨</span>
+        <h3 class="mb-1 font-bold" data-i18n="features.f4t">تصميم عصري</h3>
+        <p class="text-sm leading-7 text-muted" data-i18n="features.f4d">واجهة أنيقة بتدرجات براند ظرف، تعمل على الجوال والكمبيوتر.</p>
+      </article>
+    </section>
+
+    <section class="mt-10 text-center">
+      <p class="mb-3 text-xs text-muted" data-i18n="domains.title">الدومينات المتاحة حالياً</p>
+      <div id="domainsChips" class="flex flex-wrap items-center justify-center gap-2"></div>
+    </section>
+  </main>
+
+  <!-- ===================== التذييل ===================== -->
+  <footer class="border-t border-line/60 glass">
+    <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-xs text-muted sm:flex-row">
+      <p>© <span id="year">2025</span> <span data-i18n="footer.rights">ظرف — Zarf Mail. صُنع بحب للمطوّرين.</span></p>
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <a class="hover:text-fg" href="/api/health" target="_blank" rel="noopener" data-i18n="footer.server">حالة السيرفر</a>
+        <span class="hidden sm:inline">·</span>
+        <span id="footerTtl" data-i18n="footer.ttl">صالح لمدة 7 أيام</span>
+        <span class="hidden sm:inline">·</span>
+        <a class="hover:text-fg" href="https://mail.tm" target="_blank" rel="noopener noreferrer" data-i18n="footer.powered">
+          مدعوم بخدمة mail.tm
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================== مودال تفاصيل الرسالة ===================== -->
+  <div id="messageModal" class="fixed inset-0 z-50 hidden">
+    <div id="modalBackdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in"></div>
+
+    <div class="absolute inset-0 flex items-end justify-center p-0 sm:items-center sm:p-6">
+      <div class="zarf-card flex max-h-[92vh] w-full max-w-3xl animate-slide-up flex-col overflow-hidden !rounded-b-none sm:!rounded-4xl">
+
+        <div class="flex items-start justify-between gap-4 border-b border-line/70 p-5">
+          <div class="min-w-0">
+            <p id="modalSenderName" class="truncate font-bold">—</p>
+            <p id="modalSenderEmail" class="truncate font-mono text-xs text-muted">—</p>
+          </div>
+          <button id="modalClose" class="zarf-btn-ghost !px-3 !py-2" data-i18n-aria="modal.close" aria-label="إغلاق">
+            <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4" aria-hidden="true">
+              <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-5">
+          <div id="modalOtp" class="otp-banner mb-5 hidden">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p class="mb-1 text-xs font-medium text-warning" data-i18n="otp.modalTitle">تم استخراج كود تحقق من هذه الرسالة</p>
+                <p id="modalOtpCode" class="font-mono text-3xl font-black tracking-[.35em] text-fg">000000</p>
+              </div>
+              <button id="modalOtpCopy" class="zarf-btn !bg-warning/20 !text-warning hover:!bg-warning/30" data-i18n-aria="otp.copy">
+                <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4" aria-hidden="true">
+                  <rect x="9" y="9" width="11" height="11" rx="2.5" stroke="currentColor" stroke-width="1.7"/>
+                  <path d="M15 6.5V6A2 2 0 0 0 13 4H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+                <span data-i18n="otp.copy">نسخ الكود</span>
+              </button>
+            </div>
+          </div>
+
+          <h3 id="modalSubject" class="mb-2 text-xl font-bold leading-8">—</h3>
+          <div class="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted">
+            <span class="zarf-chip"><span data-i18n="modal.to">إلى</span>: <span id="modalTo" class="font-mono">—</span></span>
+            <span id="modalTime" class="zarf-chip">—</span>
+            <span id="modalSize" class="zarf-chip" data-i18n-title="modal.bytes" title="الحجم">—</span>
+          </div>
+
+          <div id="modalAttachments" class="mb-4 hidden flex-wrap items-center gap-2" data-i18n-aria="modal.attachments"></div>
+
+          <div class="mb-3 flex items-center gap-2" id="modalTabs">
+            <button data-tab="html" class="zarf-btn !bg-brand/15 !px-3 !py-1.5 !text-xs !text-brand" data-i18n="modal.tabHtml">عرض HTML</button>
+            <button data-tab="text" class="zarf-btn-soft !px-3 !py-1.5 !text-xs" data-i18n="modal.tabText">النص الأصلي</button>
+          </div>
+
+          <div id="tabHtml" class="rounded-2xl border border-line bg-white/95">
+            <iframe id="mailHtmlFrame" title="محتوى الرسالة" sandbox="" class="h-[52vh] min-h-[260px] w-full rounded-2xl border-0 bg-white"></iframe>
+          </div>
+          <pre id="tabText" class="mail-body hidden whitespace-pre-wrap rounded-2xl border border-line bg-surface2/40 p-4 font-sans"></pre>
+        </div>
+
+        <div class="flex items-center justify-between gap-3 border-t border-line/70 bg-surface2/40 p-4">
+          <button id="modalDelete" class="zarf-btn-danger !py-2.5 text-xs" data-i18n-aria="modal.delete">
+            <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4" aria-hidden="true">
+              <path d="M5 7h14M10 7V5.5A1.5 1.5 0 0 1 11.5 4h1A1.5 1.5 0 0 1 14 5.5V7m-6 0 .8 11.2A2 2 0 0 0 10.8 20h2.4a2 2 0 0 0 2-1.8L16 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+            <span data-i18n="modal.delete">حذف الرسالة</span>
+          </button>
+          <button id="modalDismiss" class="zarf-btn-primary !py-2.5 text-xs" data-i18n="modal.close">إغلاق</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== مودال "كيف يعمل" ===================== -->
+  <div id="howModal" class="fixed inset-0 z-50 hidden">
+    <div id="howBackdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-6">
+      <div class="zarf-card w-full max-w-lg animate-pop-in p-6">
+        <h3 class="mb-4 text-xl font-bold" data-i18n="how.title">كيف يعمل ظرف؟</h3>
+        <ol class="space-y-4 text-sm leading-7 text-muted">
+          <li class="flex gap-3">
+            <span class="grid h-7 w-7 shrink-0 place-items-center rounded-xl bg-brand/15 text-xs font-bold text-brand">1</span>
+            <span data-i18n="how.1">نفتح لك بريداً مؤقتاً فور دخولك — انسخه بضغطة واحدة.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="grid h-7 w-7 shrink-0 place-items-center rounded-xl bg-brand2/15 text-xs font-bold text-brand2">2</span>
+            <span data-i18n="how.2">استعمله في التسجيل في أي موقع أو تطبيق.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="grid h-7 w-7 shrink-0 place-items-center rounded-xl bg-warning/15 text-xs font-bold text-warning">3</span>
+            <span data-i18n="how.3">نلتقط كود التحقق (OTP) تلقائياً ونبرزه لك في الأعلى.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="grid h-7 w-7 shrink-0 place-items-center rounded-xl bg-success/15 text-xs font-bold text-success">4</span>
+            <span id="how4Text" data-i18n="how.4">بعد 7 أيام يُحذف البريد وكل رسائله نهائياً — بلا أثر.</span>
+          </li>
+        </ol>
+        <div class="mt-6 rounded-2xl border border-line bg-surface2/50 p-4 text-xs leading-7 text-muted" data-i18n="how.note">
+          تنبيه: ظرف للاستخدام العام ولا يُصلح لاستلام معلومات حساسة أو بنكية.
+        </div>
+        <button id="howClose" class="zarf-btn-primary mt-5 w-full !py-3" data-i18n="how.close">فهمت، لنبدأ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== مودال تأكيد الحذف ===================== -->
+  <div id="confirmModal" class="fixed inset-0 z-[55] hidden">
+    <div id="confirmBackdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-6">
+      <div class="zarf-card w-full max-w-sm animate-pop-in p-6 text-center">
+        <span class="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-danger/15 text-2xl text-danger">🗑️</span>
+        <h3 id="confirmTitle" class="mb-2 text-lg font-bold">تأكيد الحذف</h3>
+        <p id="confirmText" class="mb-6 text-sm leading-7 text-muted">—</p>
+        <div class="flex gap-3">
+          <button id="confirmCancel" class="zarf-btn-ghost flex-1 !py-3" data-i18n="confirm.cancel">إلغاء</button>
+          <button id="confirmOk" class="zarf-btn !flex-1 !bg-danger !py-3 !text-white hover:!bg-danger/85" data-i18n="confirm.ok">تأكيد</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== الإشعارات ===================== -->
+  <div id="toasts" class="pointer-events-none fixed left-1/2 top-4 z-[70] flex w-[92vw] max-w-sm -translate-x-1/2 flex-col gap-2"></div>
+
+  <!-- محرك اللغات يجب أن يُحمّل قبل تطبيق الواجهة -->
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
