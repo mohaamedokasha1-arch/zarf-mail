@@ -1,0 +1,45 @@
+# =============================================================
+#  Render Blueprint — نشر بضغطة واحدة لظرف (Zarf Mail)
+# -------------------------------------------------------------
+#  1) ادفع هذا الملف إلى GitHub ثم من لوحة Render:
+#     New → Blueprint → اختر المستودع → Done
+#  2) أو استخدم زر النشر المباشر من README.
+#
+#  ملاحظات:
+#  - السيرفر Node.js واحد (الواجهة + API معاً) — لا يوجد فصل.
+#  - قرص دائم 1GB لملف قاعدة البيانات (SQLite) حتى لا تُفقد
+#    البيانات عند كل إعادة نشر.
+#  - فحص الصحة على /api/health حتى لا تعتبر المنصة الخدمة
+#    "لا تستجيب".
+# =============================================================
+services:
+  - type: web
+    name: zarf-mail
+    runtime: node
+    plan: free
+    numInstances: 1
+    buildCommand: npm install && npm run build:css
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+    disk:
+      name: zarf-data
+      mountPath: /var/data
+      sizeGB: 1
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: MAIL_PROVIDER
+        value: mailtm
+      - key: DATA_DIR
+        value: /var/data
+      - key: DB_FILE
+        value: /var/data/zarf.db
+      - key: APP_SECRET
+        generateValue: true
+      - key: INBOUND_WEBHOOK_KEY
+        generateValue: true

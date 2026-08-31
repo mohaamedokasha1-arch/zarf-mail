@@ -333,12 +333,39 @@ npm run cleanup
 
 يعمل ظرف على أي منصة Node.js — **لا يحتاج بورت 25 ولا سجلات MX** لأن mail.tm يستقبل البريد نيابةً عنا:
 
+> ⚠️ **أهم خطوة:** ظرف **ليس موقعاً ثابتاً** — الواجهة والـ API يعملان من **سيرفر Node.js واحد** (`npm start`).
+> لا تنشره على Vercel أو Netlify أو GitHub Pages أو Cloudflare Pages (منصات ملفات ثابتة فقط):
+> سيفتح الموقع ويظهر لك «السيرفر لا يستجيب» لأن طلبات `/api/...` لا يخدمها أحد.
+
+### ⚡ النشر بضغطة واحدة على Render
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mohaamedokasha1-arch/zarf-mail)
+
+(يقرأ الزر ملف `render.yaml` تلقائياً: أمر البناء، أمر التشغيل، فحص الصحة، والقرص الدائم للبيانات.)
+
 | المنصة | ملاحظة |
 |---|---|
-| **Render** | Build: `npm install && npm run build:css` · Start: `npm start` |
-| **Railway / Koyeb** | `railway up` ثم أضف المتغيرات |
+| **Render** | Build: `npm install && npm run build:css` · Start: `npm start` · Health check: `/api/health` |
+| **Railway / Koyeb** | `railway up` ثم أضف المتغيرات — تأكد أن بورت الإقلاع = قيمة `PORT` التي تمنحها المنصة |
 | **VPS** | `pm2 start server/index.js` + Nginx (راجع إعداد `proxy_buffering off` لـ SSE) |
 | **Docker** | `docker build -t zarf-mail . && docker run -p 3000:3000 -v zarf-data:/app/data zarf-mail` |
+
+### 🔧 ماذا تفعل لو قال الموقع «السيرفر لا يستجيب»؟
+
+1. **نشرت على منصة ثابتة؟** (Vercel/Netlify/GitHub Pages) — هذه المنصات لا تشغّل Node.js.
+   انقل إلى **Render أو Railway أو VPS** (انظر الجدول أعلاه).
+2. **بعد النشر مباشرة؟** انتظر 1–3 دقائق حتى يكتمل البناء، ثم افتح `https://عنوانك/api/health`
+   — إن رأيت JSON يبدأ بـ `{"success":true...` فالسيرفر يعمل والموقع سيعمل معه.
+3. **الطبقة المجانية تنام؟** (Render Free تنام بعد 15 دقيقة بلا استخدام) — أول زيارة بعد النوم
+   تحتاج 30–60 ثانية ليستيقظ السيرفر، فيظهر الخطأ مؤقتاً. الحل: استخدم الموقع بانتظام، أو
+   أضِف Uptime Monitor خارجياً يطلب `/api/health` كل 5 دقائق، أو ارفع الخطة.
+4. **خطأ في بناء `better-sqlite3`؟** هذه حزمة أصلية (native) تحتاج أدوات بناء؛
+   على Render/Railway موجودة افتراضياً. على VPS: `sudo apt install build-essential python3` ثم `npm install`.
+   أو استخدم Docker فتتولى الصورة كل شيء.
+5. **بورت خاطئ؟** السيرفر يقرأ `PORT` من البيئة تلقائياً — لا تعدّل `server/index.js`؛
+   فقط اضبط متغير `PORT` على ما تطلبه المنصة (Render يضبطه عنك).
+6. **الدومين يعمل لكن البريد لا يُنشأ؟** افتح سجلات التطبيق (Logs): إذا رأيت `429` فهذه حصة
+   mail.tm المشتركة (30 طلب/دقيقة لكل IP) — انتظر دقيقة وأعد المحاولة.
 
 > ⚠️ الحصة (30 طلب/دقيقة) تُحسب **لكل IP**، أي أن كل مستخدمي نسختك يتشاركون نفس الحصة.
 > نظام المزامنة التكيّفي في ظرف يتعامل مع هذا تلقائياً: كلما زاد المستخدمون تباعدت
